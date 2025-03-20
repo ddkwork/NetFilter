@@ -1,0 +1,860 @@
+package main
+
+/*
+#include <windows.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "nfapi.h"
+#include "nfevents.h"
+#include "nfdriver.h"
+
+typedef struct _NF_FLOWCTL_STAT {
+    unsigned __int64 inBytes;
+    unsigned __int64 outBytes;
+} NF_FLOWCTL_STAT, *PNF_FLOWCTL_STAT;
+
+typedef struct _NF_FLOWCTL_DATA {
+    unsigned __int64 inLimit;
+    unsigned __int64 outLimit;
+} NF_FLOWCTL_DATA, *PNF_FLOWCTL_DATA;
+
+typedef struct _NF_FLOWCTL_MODIFY_DATA {
+    unsigned int fcHandle;
+    NF_FLOWCTL_DATA data;
+} NF_FLOWCTL_MODIFY_DATA, *PNF_FLOWCTL_MODIFY_DATA;
+
+typedef struct _NF_FLOWCTL_SET_DATA {
+    unsigned __int64 endpointId;
+    unsigned int fcHandle;
+} NF_FLOWCTL_SET_DATA, *PNF_FLOWCTL_SET_DATA;
+
+typedef struct _NF_PORT_RANGE {
+    unsigned short valueLow;
+    unsigned short valueHigh;
+} NF_PORT_RANGE, *PNF_PORT_RANGE;
+
+typedef struct _NF_BINDING_RULE {
+    int protocol;
+    unsigned long processId;
+    wchar_t processName[MAX_PATH];
+    unsigned short localPort;
+    unsigned short ip_family;
+    unsigned char localIpAddress[NF_MAX_IP_ADDRESS_LENGTH];
+    unsigned char localIpAddressMask[NF_MAX_IP_ADDRESS_LENGTH];
+    unsigned char newLocalIpAddress[NF_MAX_IP_ADDRESS_LENGTH];
+    unsigned short newLocalPort;
+    unsigned long filteringFlag;
+} NF_BINDING_RULE, *PNF_BINDING_RULE;
+
+typedef struct _NF_UDP_CONN_INFO {
+    unsigned long processId;
+    unsigned short ip_family;
+    unsigned char localAddress[NF_MAX_ADDRESS_LENGTH];
+} NF_UDP_CONN_INFO, *PNF_UDP_CONN_INFO;
+
+typedef struct _NF_UDP_CONN_REQUEST {
+    unsigned long filteringFlag;
+    unsigned long processId;
+    unsigned short ip_family;
+    unsigned char localAddress[NF_MAX_ADDRESS_LENGTH];
+    unsigned char remoteAddress[NF_MAX_ADDRESS_LENGTH];
+} NF_UDP_CONN_REQUEST, *PNF_UDP_CONN_REQUEST;
+
+typedef struct _NF_UDP_OPTIONS {
+    unsigned long flags;
+    long optionsLength;
+    unsigned char options[1];
+} NF_UDP_OPTIONS, *PNF_UDP_OPTIONS;
+
+typedef struct _NF_IP_PACKET_OPTIONS {
+    unsigned short ip_family;
+    unsigned int ipHeaderSize;
+    unsigned long compartmentId;
+    unsigned long interfaceIndex;
+    unsigned long subInterfaceIndex;
+    unsigned long flags;
+} NF_IP_PACKET_OPTIONS, *PNF_IP_PACKET_OPTIONS;
+
+typedef struct _NF_TCP_CONN_INFO {
+    unsigned long filteringFlag;
+    unsigned long processId;
+    unsigned char direction;
+    unsigned short ip_family;
+    unsigned char localAddress[NF_MAX_ADDRESS_LENGTH];
+    unsigned char remoteAddress[NF_MAX_ADDRESS_LENGTH];
+} NF_TCP_CONN_INFO, *PNF_TCP_CONN_INFO;
+
+typedef struct _NF_RULE {
+    int protocol;
+    unsigned long processId;
+    unsigned char direction;
+    unsigned short localPort;
+    unsigned short remotePort;
+    unsigned short ip_family;
+    unsigned char localIpAddress[NF_MAX_IP_ADDRESS_LENGTH];
+    unsigned char localIpAddressMask[NF_MAX_IP_ADDRESS_LENGTH];
+    unsigned char remoteIpAddress[NF_MAX_IP_ADDRESS_LENGTH];
+    unsigned char remoteIpAddressMask[NF_MAX_IP_ADDRESS_LENGTH];
+    unsigned long filteringFlag;
+} NF_RULE, *PNF_RULE;
+
+typedef struct _NF_RULE_EX {
+    int protocol;
+    unsigned long processId;
+    unsigned char direction;
+    unsigned short localPort;
+    unsigned short remotePort;
+    unsigned short ip_family;
+    unsigned char localIpAddress[NF_MAX_IP_ADDRESS_LENGTH];
+    unsigned char localIpAddressMask[NF_MAX_IP_ADDRESS_LENGTH];
+    unsigned char remoteIpAddress[NF_MAX_IP_ADDRESS_LENGTH];
+    unsigned char remoteIpAddressMask[NF_MAX_IP_ADDRESS_LENGTH];
+    unsigned long filteringFlag;
+    wchar_t processName[MAX_PATH];
+    NF_PORT_RANGE localPortRange;
+    NF_PORT_RANGE remotePortRange;
+    unsigned char redirectTo[NF_MAX_ADDRESS_LENGTH];
+    unsigned long localProxyProcessId;
+} NF_RULE_EX, *PNF_RULE_EX;
+
+typedef unsigned __int64 ENDPOINT_ID;
+
+typedef struct _NF_EventHandler {
+    void (*threadStart)();
+    void (*threadEnd)();
+    void (*tcpConnectRequest)(ENDPOINT_ID id, PNF_TCP_CONN_INFO pConnInfo);
+    void (*tcpConnected)(ENDPOINT_ID id, PNF_TCP_CONN_INFO pConnInfo);
+    void (*tcpClosed)(ENDPOINT_ID id, PNF_TCP_CONN_INFO pConnInfo);
+    void (*tcpReceive)(ENDPOINT_ID id, const char *buf, int len);
+    void (*tcpSend)(ENDPOINT_ID id, const char *buf, int len);
+    void (*tcpCanReceive)(ENDPOINT_ID id);
+    void (*tcpCanSend)(ENDPOINT_ID id);
+    void (*udpCreated)(ENDPOINT_ID id, PNF_UDP_CONN_INFO pConnInfo);
+    void (*udpConnectRequest)(ENDPOINT_ID id, PNF_UDP_CONN_REQUEST pConnReq);
+    void (*udpClosed)(ENDPOINT_ID id, PNF_UDP_CONN_INFO pConnInfo);
+    void (*udpReceive)(ENDPOINT_ID id, const unsigned char *remoteAddress, const char *buf, int len, PNF_UDP_OPTIONS options);
+    void (*udpSend)(ENDPOINT_ID id, const unsigned char *remoteAddress, const char *buf, int len, PNF_UDP_OPTIONS options);
+    void (*udpCanReceive)(ENDPOINT_ID id);
+    void (*udpCanSend)(ENDPOINT_ID id);
+} NF_EventHandler, *PNF_EventHandler;
+
+typedef struct _NF_IPEventHandler {
+    void (*ipReceive)(const char *buf, int len, PNF_IP_PACKET_OPTIONS options);
+    void (*ipSend)(const char *buf, int len, PNF_IP_PACKET_OPTIONS options);
+} NF_IPEventHandler, *PNF_IPEventHandler;
+*/
+import (
+	"fmt"
+	"syscall"
+	"unsafe"
+)
+
+// Constants for NF_STATUS
+const (
+	NF_STATUS_SUCCESS        = 0
+	NF_STATUS_FAIL         = -1
+	NF_STATUS_INVALID_ENDPOINT_ID = -2
+	NF_STATUS_NOT_INITIALIZED    = -3
+	NF_STATUS_IO_ERROR       = -4
+	NF_STATUS_REBOOT_REQUIRED = -5
+)
+
+// Constants for NF_FLAGS
+const (
+	NFF_NONE = 0
+	NFF_DONT_DISABLE_TEREDO = 1
+	NFF_DONT_DISABLE_TCP_OFFLOADING = 2
+	NFF_DISABLE_AUTO_REGISTER = 4
+	NFF_DISABLE_AUTO_START = 8
+)
+
+// Constants for NF_DIRECTION
+const (
+	NF_D_IN = 1
+	NF_D_OUT = 2
+	NF_D_BOTH = 3
+)
+
+// Constants for NF_FILTERING_FLAG
+const (
+	NF_ALLOW = 0
+	NF_BLOCK = 1
+	NF_FILTER = 2
+	NF_SUSPENDED = 4
+	NF_OFFLINE = 8
+	NF_INDICATE_CONNECT_REQUESTS = 16
+	NF_DISABLE_REDIRECT_PROTECTION = 32
+	NF_PEND_CONNECT_REQUEST = 64
+	NF_FILTER_AS_IP_PACKETS = 128
+	NF_READONLY = 256
+	NF_CONTROL_FLOW = 512
+	NF_REDIRECT = 1024
+	NF_BYPASS_IP_PACKETS = 2048
+)
+
+// Constants for TDI_RECEIVE_* flags
+const (
+	TDI_RECEIVE_BROADCAST           = 0x00000004
+	TDI_RECEIVE_MULTICAST           = 0x00000008
+	TDI_RECEIVE_PARTIAL             = 0x00000010
+	TDI_RECEIVE_NORMAL              = 0x00000020
+	TDI_RECEIVE_EXPEDITED           = 0x00000040
+	TDI_RECEIVE_PEEK                = 0x00000080
+	TDI_RECEIVE_NO_RESPONSE_EXP     = 0x00000100
+	TDI_RECEIVE_COPY_LOOKAHEAD      = 0x00000200
+	TDI_RECEIVE_ENTIRE_MESSAGE      = 0x00000400
+	TDI_RECEIVE_AT_DISPATCH_LEVEL   = 0x00000800
+	TDI_RECEIVE_CONTROL_INFO        = 0x00001000
+	TDI_RECEIVE_FORCE_INDICATION    = 0x00002000
+	TDI_RECEIVE_NO_PUSH             = 0x00004000
+)
+
+// Constants for AF_INET and IPPROTO_TCP
+const (
+	AF_INET = 2
+	IPPROTO_TCP = 6
+)
+
+// Define NF_RULE and NF_RULE_EX
+type NF_RULE struct {
+	protocol              int32
+	processId             uint32
+	direction             byte
+	localPort             uint16
+	remotePort            uint16
+	ip_family             uint16
+	localIpAddress        [16]byte
+	localIpAddressMask    [16]byte
+	remoteIpAddress       [16]byte
+	remoteIpAddressMask   [16]byte
+	filteringFlag         uint32
+}
+
+type NF_RULE_EX struct {
+	protocol              int32
+	processId             uint32
+	direction             byte
+	localPort             uint16
+	remotePort            uint16
+	ip_family             uint16
+	localIpAddress        [16]byte
+	localIpAddressMask    [16]byte
+	remoteIpAddress       [16]byte
+	remoteIpAddressMask   [16]byte
+	filteringFlag         uint32
+	processName           [260]uint16
+	localPortRange        NF_PORT_RANGE
+	remotePortRange       NF_PORT_RANGE
+	redirectTo            [28]byte
+	localProxyProcessId   uint32
+}
+
+type NF_PORT_RANGE struct {
+	valueLow  uint16
+	valueHigh uint16
+}
+
+type NF_TCP_CONN_INFO struct {
+	filteringFlag uint32
+	processId     uint32
+	direction     byte
+	ip_family     uint16
+	localAddress  [28]byte
+	remoteAddress [28]byte
+}
+
+type NF_UDP_CONN_INFO struct {
+	processId  uint32
+	ip_family  uint16
+	localAddress [28]byte
+}
+
+type NF_UDP_CONN_REQUEST struct {
+	filteringFlag uint32
+	processId     uint32
+	ip_family     uint16
+	localAddress  [28]byte
+	remoteAddress [28]byte
+}
+
+type NF_UDP_OPTIONS struct {
+	flags         uint32
+	optionsLength int32
+	options       [1]byte
+}
+
+type NF_IP_PACKET_OPTIONS struct {
+	ip_family         uint16
+	ipHeaderSize      uint32
+	compartmentId   uint32
+	interfaceIndex  uint32
+	subInterfaceIndex uint32
+	flags             uint32
+}
+
+type NF_FLOWCTL_STAT struct {
+	inBytes  uint64
+	outBytes uint64
+}
+
+type NF_FLOWCTL_DATA struct {
+	inLimit  uint64
+	outLimit uint64
+}
+
+type NF_FLOWCTL_MODIFY_DATA struct {
+	fcHandle unsigned
+	data     NF_FLOWCTL_DATA
+}
+
+type NF_FLOWCTL_SET_DATA struct {
+	endpointId unsigned
+	fcHandle   unsigned
+}
+
+type NF_EventHandler struct {
+	threadStart         func()
+	threadEnd           func()
+	tcpConnectRequest   func(id uint64, pConnInfo *NF_TCP_CONN_INFO)
+	tcpConnected        func(id uint64, pConnInfo *NF_TCP_CONN_INFO)
+	tcpClosed           func(id uint64, pConnInfo *NF_TCP_CONN_INFO)
+	tcpReceive          func(id uint64, buf *byte, len int32)
+	tcpSend             func(id uint64, buf *byte, len int32)
+	tcpCanReceive       func(id uint64)
+	tcpCanSend          func(id uint64)
+	udpCreated          func(id uint64, pConnInfo *NF_UDP_CONN_INFO)
+	udpConnectRequest   func(id uint64, pConnReq *NF_UDP_CONN_REQUEST)
+	udpClosed           func(id uint64, pConnInfo *NF_UDP_CONN_INFO)
+	udpReceive          func(id uint64, remoteAddress *byte, buf *byte, len int32, options *NF_UDP_OPTIONS)
+	udpSend             func(id uint64, remoteAddress *byte, buf *byte, len int32, options *NF_UDP_OPTIONS)
+	udpCanReceive       func(id uint64)
+	udpCanSend          func(id uint64)
+}
+
+type NF_IPEventHandler struct {
+	ipReceive func(buf *byte, len int32, options *NF_IP_PACKET_OPTIONS)
+	ipSend    func(buf *byte, len int32, options *NF_IP_PACKET_OPTIONS)
+}
+
+// Load DLL
+var (
+	nfapiDLL = syscall.NewLazyDLL("nfapi.dll")
+
+	nfInit                  = nfapiDLL.NewProc("nf_init")
+	nfFree                  = nfapiDLL.NewProc("nf_free")
+	nfRegisterDriver        = nfapiDLL.NewProc("nf_registerDriver")
+	nfRegisterDriverEx      = nfapiDLL.NewProc("nf_registerDriverEx")
+	nfUnRegisterDriver      = nfapiDLL.NewProc("nf_unRegisterDriver")
+	nfTcpSetConnectionState = nfapiDLL.NewProc("nf_tcpSetConnectionState")
+	nfTcpPostSend           = nfapiDLL.NewProc("nf_tcpPostSend")
+	nfTcpPostReceive        = nfapiDLL.NewProc("nf_tcpPostReceive")
+	nfTcpClose              = nfapiDLL.NewProc("nf_tcpClose")
+	nfSetTCPTimeout         = nfapiDLL.NewProc("nf_setTCPTimeout")
+	nfTcpDisableFiltering   = nfapiDLL.NewProc("nf_tcpDisableFiltering")
+	nfUdpSetConnectionState = nfapiDLL.NewProc("nf_udpSetConnectionState")
+	nfUdpPostSend           = nfapiDLL.NewProc("nf_udpPostSend")
+	nfUdpPostReceive        = nfapiDLL.NewProc("nf_udpPostReceive")
+	nfUdpDisableFiltering   = nfapiDLL.NewProc("nf_udpDisableFiltering")
+	nfIpPostSend            = nfapiDLL.NewProc("nf_ipPostSend")
+	nfIpPostReceive         = nfapiDLL.NewProc("nf_ipPostReceive")
+	nfAddRule               = nfapiDLL.NewProc("nf_addRule")
+	nfDeleteRules           = nfapiDLL.NewProc("nf_deleteRules")
+	nfSetRules              = nfapiDLL.NewProc("nf_setRules")
+	nfAddRuleEx             = nfapiDLL.NewProc("nf_addRuleEx")
+	nfSetRulesEx            = nfapiDLL.NewProc("nf_setRulesEx")
+	nfGetConnCount          = nfapiDLL.NewProc("nf_getConnCount")
+	nfTcpSetSockOpt         = nfapiDLL.NewProc("nf_tcpSetSockOpt")
+	nfGetProcessNameA       = nfapiDLL.NewProc("nf_getProcessNameA")
+	nfGetProcessNameW       = nfapiDLL.NewProc("nf_getProcessNameW")
+	nfGetProcessNameFromKernel = nfapiDLL.NewProc("nf_getProcessNameFromKernel")
+	nfAdjustProcessPriviledges = nfapiDLL.NewProc("nf_adjustProcessPriviledges")
+	nfTcpIsProxy            = nfapiDLL.NewProc("nf_tcpIsProxy")
+	nfSetOptions            = nfapiDLL.NewProc("nf_setOptions")
+	nfCompleteTCPConnectRequest = nfapiDLL.NewProc("nf_completeTCPConnectRequest")
+	nfCompleteUDPConnectRequest = nfapiDLL.NewProc("nf_completeUDPConnectRequest")
+	nfGetTCPConnInfo        = nfapiDLL.NewProc("nf_getTCPConnInfo")
+	nfGetUDPConnInfo        = nfapiDLL.NewProc("nf_getUDPConnInfo")
+	nfSetIPEventHandler     = nfapiDLL.NewProc("nf_setIPEventHandler")
+	nfAddFlowCtl            = nfapiDLL.NewProc("nf_addFlowCtl")
+	nfDeleteFlowCtl         = nfapiDLL.NewProc("nf_deleteFlowCtl")
+	nfSetTCPFlowCtl         = nfapiDLL.NewProc("nf_setTCPFlowCtl")
+	nfSetUDPFlowCtl         = nfapiDLL.NewProc("nf_setUDPFlowCtl")
+	nfModifyFlowCtl         = nfapiDLL.NewProc("nf_modifyFlowCtl")
+	nfGetFlowCtlStat        = nfapiDLL.NewProc("nf_getFlowCtlStat")
+	nfGetTCPStat            = nfapiDLL.NewProc("nf_getTCPStat")
+	nfGetUDPStat            = nfapiDLL.NewProc("nf_getUDPStat")
+	nfAddBindingRule        = nfapiDLL.NewProc("nf_addBindingRule")
+	nDeleteBindingRules     = nfapiDLL.NewProc("nf_deleteBindingRules")
+	nfGetDriverType         = nfapiDLL.NewProc("nf_getDriverType")
+)
+
+// Function bindings
+func nfInitGo(driverName string, pHandler *NF_EventHandler) int32 {
+	dn, _ := syscall.BytePtrFromString(driverName)
+	ret, _, _ := nfInit.Call(
+		uintptr(unsafe.Pointer(dn)),
+		uintptr(unsafe.Pointer(pHandler)),
+	)
+	return int32(ret)
+}
+
+func nfFreeGo() {
+	nfFree.Call()
+}
+
+func nfRegisterDriverGo(driverName string) int32 {
+	dn, _ := syscall.BytePtrFromString(driverName)
+	ret, _, _ := nfRegisterDriver.Call(
+		uintptr(unsafe.Pointer(dn)),
+	)
+	return int32(ret)
+}
+
+func nfRegisterDriverExGo(driverName string, driverPath string) int32 {
+	dn, _ := syscall.BytePtrFromString(driverName)
+	dp, _ := syscall.BytePtrFromString(driverPath)
+	ret, _, _ := nfRegisterDriverEx.Call(
+		uintptr(unsafe.Pointer(dn)),
+		uintptr(unsafe.Pointer(dp)),
+	)
+	return int32(ret)
+}
+
+func nfUnRegisterDriverGo(driverName string) int32 {
+	dn, _ := syscall.BytePtrFromString(driverName)
+	ret, _, _ := nfUnRegisterDriver.Call(
+		uintptr(unsafe.Pointer(dn)),
+	)
+	return int32(ret)
+}
+
+func nfTcpSetConnectionStateGo(id uint64, suspended int32) int32 {
+	ret, _, _ := nfTcpSetConnectionState.Call(
+		uintptr(id),
+		uintptr(suspended),
+	)
+	return int32(ret)
+}
+
+func nfTcpPostSendGo(id uint64, buf *byte, len int32) int32 {
+	ret, _, _ := nfTcpPostSend.Call(
+		uintptr(id),
+		uintptr(unsafe.Pointer(buf)),
+		uintptr(len),
+	)
+	return int32(ret)
+}
+
+func nfTcpPostReceiveGo(id uint64, buf *byte, len int32) int32 {
+	ret, _, _ := nfTcpPostReceive.Call(
+		uintptr(id),
+		uintptr(unsafe.Pointer(buf)),
+		uintptr(len),
+	)
+	return int32(ret)
+}
+
+func nfTcpCloseGo(id uint64) int32 {
+	ret, _, _ := nfTcpClose.Call(
+		uintptr(id),
+	)
+	return int32(ret)
+}
+
+func nfSetTCPTimeoutGo(timeout uint32) uint32 {
+	ret, _, _ := nfSetTCPTimeout.Call(
+		uintptr(timeout),
+	)
+	return uint32(ret)
+}
+
+func nfTcpDisableFilteringGo(id uint64) int32 {
+	ret, _, _ := nfTcpDisableFiltering.Call(
+		uintptr(id),
+	)
+	return int32(ret)
+}
+
+func nfUdpSetConnectionStateGo(id uint64, suspended int32) int32 {
+	ret, _, _ := nfUdpSetConnectionState.Call(
+		uintptr(id),
+		uintptr(suspended),
+	)
+	return int32(ret)
+}
+
+func nfUdpPostSendGo(id uint64, remoteAddress *byte, buf *byte, len int32, options *NF_UDP_OPTIONS) int32 {
+	ret, _, _ := nfUdpPostSend.Call(
+		uintptr(id),
+		uintptr(unsafe.Pointer(remoteAddress)),
+		uintptr(unsafe.Pointer(buf)),
+		uintptr(len),
+		uintptr(unsafe.Pointer(options)),
+	)
+	return int32(ret)
+}
+
+func nfUdpPostReceiveGo(id uint64, remoteAddress *byte, buf *byte, len int32, options *NF_UDP_OPTIONS) int32 {
+	ret, _, _ := nfUdpPostReceive.Call(
+		uintptr(id),
+		uintptr(unsafe.Pointer(remoteAddress)),
+		uintptr(unsafe.Pointer(buf)),
+		uintptr(len),
+		uintptr(unsafe.Pointer(options)),
+	)
+	return int32(ret)
+}
+
+func nfUdpDisableFilteringGo(id uint64) int32 {
+	ret, _, _ := nfUdpDisableFiltering.Call(
+		uintptr(id),
+	)
+	return int32(ret)
+}
+
+func nfIpPostSendGo(buf *byte, len int32, options *NF_IP_PACKET_OPTIONS) int32 {
+	ret, _, _ := nfIpPostSend.Call(
+		uintptr(unsafe.Pointer(buf)),
+		uintptr(len),
+		uintptr(unsafe.Pointer(options)),
+	)
+	return int32(ret)
+}
+
+func nfIpPostReceiveGo(buf *byte, len int32, options *NF_IP_PACKET_OPTIONS) int32 {
+	ret, _, _ := nfIpPostReceive.Call(
+		uintptr(unsafe.Pointer(buf)),
+		uintptr(len),
+		uintptr(unsafe.Pointer(options)),
+	)
+	return int32(ret)
+}
+
+func nfAddRuleGo(pRule *NF_RULE, toHead int32) int32 {
+	ret, _, _ := nfAddRule.Call(
+		uintptr(unsafe.Pointer(pRule)),
+		uintptr(toHead),
+	)
+	return int32(ret)
+}
+
+func nfDeleteRulesGo() int32 {
+	ret, _, _ := nfDeleteRules.Call()
+	return int32(ret)
+}
+
+func nfSetRulesGo(pRules *NF_RULE, count int32) int32 {
+	ret, _, _ := nfSetRules.Call(
+		uintptr(unsafe.Pointer(pRules)),
+		uintptr(count),
+	)
+	return int32(ret)
+}
+
+func nfAddRuleExGo(pRule *NF_RULE_EX, toHead int32) int32 {
+	ret, _, _ := nfAddRuleEx.Call(
+		uintptr(unsafe.Pointer(pRule)),
+		uintptr(toHead),
+	)
+	return int32(ret)
+}
+
+func nfSetRulesExGo(pRules *NF_RULE_EX, count int32) int32 {
+	ret, _, _ := nfSetRulesEx.Call(
+		uintptr(unsafe.Pointer(pRules)),
+		uintptr(count),
+	)
+	return int32(ret)
+}
+
+func nfGetConnCountGo() uint32 {
+	ret, _, _ := nfGetConnCount.Call()
+	return uint32(ret)
+}
+
+func nfTcpSetSockOptGo(id uint64, optname int32, optval *byte, optlen int32) int32 {
+	ret, _, _ := nfTcpSetSockOpt.Call(
+		uintptr(id),
+		uintptr(optname),
+		uintptr(unsafe.Pointer(optval)),
+		uintptr(optlen),
+	)
+	return int32(ret)
+}
+
+func nfGetProcessNameAGo(processId uint32, buf *byte, len uint32) bool {
+	ret, _, _ := nfGetProcessNameA.Call(
+		uintptr(processId),
+		uintptr(unsafe.Pointer(buf)),
+		uintptr(len),
+	)
+	return ret != 0
+}
+
+func nfGetProcessNameWGo(processId uint32, buf *uint16, len uint32) bool {
+	ret, _, _ := nfGetProcessNameW.Call(
+		uintptr(processId),
+		uintptr(unsafe.Pointer(buf)),
+		uintptr(len),
+	)
+	return ret != 0
+}
+
+func nfGetProcessNameFromKernelGo(processId uint32, buf *uint16, len uint32) bool {
+	ret, _, _ := nfGetProcessNameFromKernel.Call(
+		uintptr(processId),
+		uintptr(unsafe.Pointer(buf)),
+		uintptr(len),
+	)
+	return ret != 0
+}
+
+func nfAdjustProcessPriviledgesGo() {
+	nfAdjustProcessPriviledges.Call()
+}
+
+func nfTcpIsProxyGo(processId uint32) bool {
+	ret, _, _ := nfTcpIsProxy.Call(
+		uintptr(processId),
+	)
+	return ret != 0
+}
+
+func nfSetOptionsGo(nThreads uint32, flags uint32) {
+	nfSetOptions.Call(
+		uintptr(nThreads),
+		uintptr(flags),
+	)
+}
+
+func nfCompleteTCPConnectRequestGo(id uint64, pConnInfo *NF_TCP_CONN_INFO) int32 {
+	ret, _, _ := nfCompleteTCPConnectRequest.Call(
+		uintptr(id),
+		uintptr(unsafe.Pointer(pConnInfo)),
+	)
+	return int32(ret)
+}
+
+func nfCompleteUDPConnectRequestGo(id uint64, pConnInfo *NF_UDP_CONN_REQUEST) int32 {
+	ret, _, _ := nfCompleteUDPConnectRequest.Call(
+		uintptr(id),
+		uintptr(unsafe.Pointer(pConnInfo)),
+	)
+	return int32(ret)
+}
+
+func nfGetTCPConnInfoGo(id uint64, pConnInfo *NF_TCP_CONN_INFO) int32 {
+	ret, _, _ := nfGetTCPConnInfo.Call(
+		uintptr(id),
+		uintptr(unsafe.Pointer(pConnInfo)),
+	)
+	return int32(ret)
+}
+
+func nfGetUDPConnInfoGo(id uint64, pConnInfo *NF_UDP_CONN_INFO) int32 {
+	ret, _, _ := nfGetUDPConnInfo.Call(
+		uintptr(id),
+		uintptr(unsafe.Pointer(pConnInfo)),
+	)
+	return int32(ret)
+}
+
+func nfSetIPEventHandlerGo(pHandler *NF_IPEventHandler) {
+	nfSetIPEventHandler.Call(
+		uintptr(unsafe.Pointer(pHandler)),
+	)
+}
+
+func nfAddFlowCtlGo(pData *NF_FLOWCTL_DATA, pFcHandle *uint32) int32 {
+	ret, _, _ := nfAddFlowCtl.Call(
+		uintptr(unsafe.Pointer(pData)),
+		uintptr(unsafe.Pointer(pFcHandle)),
+	)
+	return int32(ret)
+}
+
+func nfDeleteFlowCtlGo(fcHandle uint32) int32 {
+	ret, _, _ := nfDeleteFlowCtl.Call(
+		uintptr(fcHandle),
+	)
+	return int32(ret)
+}
+
+func nfSetTCPFlowCtlGo(id uint64, fcHandle uint32) int32 {
+	ret, _, _ := nfSetTCPFlowCtl.Call(
+		uintptr(id),
+		uintptr(fcHandle),
+	)
+	return int32(ret)
+}
+
+func nfSetUDPFlowCtlGo(id uint64, fcHandle uint32) int32 {
+	ret, _, _ := nfSetUDPFlowCtl.Call(
+		uintptr(id),
+		uintptr(fcHandle),
+	)
+	return int32(ret)
+}
+
+func nfModifyFlowCtlGo(fcHandle uint32, pData *NF_FLOWCTL_DATA) int32 {
+	ret, _, _ := nfModifyFlowCtl.Call(
+		uintptr(fcHandle),
+		uintptr(unsafe.Pointer(pData)),
+	)
+	return int32(ret)
+}
+
+func nfGetFlowCtlStatGo(fcHandle uint32, pStat *NF_FLOWCTL_STAT) int32 {
+	ret, _, _ := nfGetFlowCtlStat.Call(
+		uintptr(fcHandle),
+		uintptr(unsafe.Pointer(pStat)),
+	)
+	return int32(ret)
+}
+
+func nfGetTCPStatGo(id uint64, pStat *NF_FLOWCTL_STAT) int32 {
+	ret, _, _ := nfGetTCPStat.Call(
+		uintptr(id),
+		uintptr(unsafe.Pointer(pStat)),
+	)
+	return int32(ret)
+}
+
+func nfGetUDPStatGo(id uint64, pStat *NF_FLOWCTL_STAT) int32 {
+	ret, _, _ := nfGetUDPStat.Call(
+		uintptr(id),
+		uintptr(unsafe.Pointer(pStat)),
+	)
+	return int32(ret)
+}
+
+func nfAddBindingRuleGo(pRule *NF_BINDING_RULE, toHead int32) int32 {
+	ret, _, _ := nfAddBindingRule.Call(
+		uintptr(unsafe.Pointer(pRule)),
+		uintptr(toHead),
+	)
+	return int32(ret)
+}
+
+func nfDeleteBindingRulesGo() int32 {
+	ret, _, _ := nfDeleteBindingRules.Call()
+	return int32(ret)
+}
+
+func nfGetDriverTypeGo() uint32 {
+	ret, _, _ := nfGetDriverType.Call()
+	return uint32(ret)
+}
+
+func main() {
+	// Define an event handler
+	eventHandler := NF_EventHandler{
+		threadStart: func() {
+			fmt.Println("Thread started")
+		},
+		threadEnd: func() {
+			fmt.Println("Thread ended")
+		},
+		tcpConnectRequest: func(id uint64, pConnInfo *NF_TCP_CONN_INFO) {
+			fmt.Printf("TCP Connect Request: ID=%d, LocalAddr=%x, RemoteAddr=%x\n", id, pConnInfo.localAddress, pConnInfo.remoteAddress)
+		},
+		tcpConnected: func(id uint64, pConnInfo *NF_TCP_CONN_INFO) {
+			fmt.Printf("TCP Connected: ID=%d, LocalAddr=%x, RemoteAddr=%x\n", id, pConnInfo.localAddress, pConnInfo.remoteAddress)
+		},
+		tcpClosed: func(id uint64, pConnInfo *NF_TCP_CONN_INFO) {
+			fmt.Printf("TCP Closed: ID=%d, LocalAddr=%x, RemoteAddr=%x\n", id, pConnInfo.localAddress, pConnInfo.remoteAddress)
+		},
+		tcpReceive: func(id uint64, buf *byte, len int32) {
+			fmt.Printf("TCP Receive: ID=%d, Len=%d, Data=%c\n", id, len, *buf)
+		},
+		tcpSend: func(id uint64, buf *byte, len int32) {
+			fmt.Printf("TCP Send: ID=%d, Len=%d, Data=%c\n", id, len, *buf)
+		},
+		tcpCanReceive: func(id uint64) {
+			fmt.Printf("TCP Can Receive: ID=%d\n", id)
+		},
+		tcpCanSend: func(id uint64) {
+			fmt.Printf("TCP Can Send: ID=%d\n", id)
+		},
+		udpCreated: func(id uint64, pConnInfo *NF_UDP_CONN_INFO) {
+			fmt.Printf("UDP Created: ID=%d, LocalAddr=%x\n", id, pConnInfo.localAddress)
+		},
+		udpConnectRequest: func(id uint64, pConnReq *NF_UDP_CONN_REQUEST) {
+			fmt.Printf("UDP Connect Request: ID=%d, LocalAddr=%x, RemoteAddr=%x\n", id, pConnReq.localAddress, pConnReq.remoteAddress)
+		},
+		udpClosed: func(id uint64, pConnInfo *NF_UDP_CONN_INFO) {
+			fmt.Printf("UDP Closed: ID=%d, LocalAddr=%x\n", id, pConnInfo.localAddress)
+		},
+		udpReceive: func(id uint64, remoteAddress *byte, buf *byte, len int32, options *NF_UDP_OPTIONS) {
+			fmt.Printf("UDP Receive: ID=%d, RemoteAddr=%x, Len=%d, Data=%c\n", id, remoteAddress, len, *buf)
+		},
+		udpSend: func(id uint64, remoteAddress *byte, buf *byte, len int32, options *NF_UDP_OPTIONS) {
+			fmt.Printf("UDP Send: ID=%d, RemoteAddr=%x, Len=%d, Data=%c\n", id, remoteAddress, len, *buf)
+		},
+		udpCanReceive: func(id uint64) {
+			fmt.Printf("UDP Can Receive: ID=%d\n", id)
+		},
+		udpCanSend: func(id uint64) {
+			fmt.Printf("UDP Can Send: ID=%d\n", id)
+		},
+	}
+
+	ipEventHandler := NF_IPEventHandler{
+		ipReceive: func(buf *byte, len int32, options *NF_IP_PACKET_OPTIONS) {
+			fmt.Printf("IP Receive: Len=%d, Data=%c\n", len, *buf)
+		},
+		ipSend: func(buf *byte, len int32, options *NF_IP_PACKET_OPTIONS) {
+			fmt.Printf("IP Send: Len=%d, Data=%c\n", len, *buf)
+		},
+	}
+
+	// Initialize the SDK
+	result := nfInitGo("exampleDriver", &eventHandler)
+	if result != NF_STATUS_SUCCESS {
+		fmt.Printf("Failed to initialize the SDK: %d\n", result)
+		return
+	}
+	defer nfFreeGo()
+
+	// Set IP event handler
+	nfSetIPEventHandlerGo(&ipEventHandler)
+
+	// Example of adding a rule
+	rule := NF_RULE{
+		protocol:      IPPROTO_TCP,
+		processId:     0,
+		direction:     NF_D_OUT,
+		localPort:     1234,
+		remotePort:    5678,
+		ip_family:     AF_INET,
+		filteringFlag: NF_FILTER,
+	}
+	result = nfAddRuleGo(&rule, 1)
+	if result != NF_STATUS_SUCCESS {
+		fmt.Printf("Failed to add rule: %d\n", result)
+		return
+	}
+
+	// Example of setting TCP options
+	var optName int32 = 1 // Example option name
+	var optVal byte = 1   // Example option value
+	result = nfTcpSetSockOptGo(1, optName, &optVal, 1)
+	if result != NF_STATUS_SUCCESS {
+		fmt.Printf("Failed to set TCP option: %d\n", result)
+		return
+	}
+
+	// Example of getting process name
+	var name [260]byte
+	if nfGetProcessNameAGo(1234, &name[0], 260) {
+		fmt.Printf("Process Name: %s\n", syscall.ByteSliceToString(name[:]))
+	}
+
+	// Example of getting driver type
+	driverType := nfGetDriverTypeGo()
+	fmt.Printf("Driver Type: %d\n", driverType)
+
+	// Example of getting connection count
+	connCount := nfGetConnCountGo()
+	fmt.Printf("Connection Count: %d\n", connCount)
+}
